@@ -1,0 +1,10 @@
+build/**
+out/**
+target/**
+gradle/**
+.gradle/**
+.idea/**
+
+gradlew
+gradlew.bat
+settings.gradle
