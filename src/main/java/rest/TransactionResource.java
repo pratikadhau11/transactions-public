@@ -19,7 +19,7 @@ import javax.ws.rs.core.MediaType;
 
 import java.util.Optional;
 
-@Path("/accounts/{id}")
+@Path("/accounts")
 @Produces(MediaType.APPLICATION_JSON)
 public class TransactionResource {
     private TransactionService transactionService;
@@ -29,18 +29,18 @@ public class TransactionResource {
     }
 
     @POST
-    @Path("/transfer")
+    @Path("/{id}/transfer")
     public Optional<TransactionResponse> transfer(@PathParam("id") String id, BankTransferRequest bankTransferRequest) {
         try{
             return transactionService.transfer(id,
                     new ToBankTransactionRequest(bankTransferRequest.getAmount(), bankTransferRequest.getTo()));
-        }catch (TransactionException e) {
+        }catch (TransactionException | DepositException | WithdrawException e) {
             throw new BadRequestException(e.getMessage());
         }
     }
 
     @POST
-    @Path("/deposit")
+    @Path("/{id}/deposit")
     public Optional<TransactionResponse> deposit(@PathParam("id") String id, TransferRequest bankTransferRequest) {
         try{
             return transactionService.transfer(id,
@@ -51,7 +51,7 @@ public class TransactionResource {
     }
 
     @POST
-    @Path("/withdraw")
+    @Path("/{id}/withdraw")
     public Optional<TransactionResponse> withdraw(@PathParam("id") String id, TransferRequest bankTransferRequest) {
         try{
             return transactionService.transfer(id,

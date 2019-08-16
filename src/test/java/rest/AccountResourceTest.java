@@ -77,7 +77,7 @@ public class AccountResourceTest {
         String id = "id";
         when(accountService.getAccount(id)).thenReturn(Optional.of(tom));
 
-        Optional<Account> account = accountResource.getAccount(id);
+        Optional<Account> account = accountResource.fetchAccount(id);
         assertEquals(tom.id, account.get().id);
         verify(accountService).getAccount(id);
     }

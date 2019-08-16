@@ -31,14 +31,6 @@ public class TransactionService {
         }
     }
 
-    private Optional<TransactionResponse> transfer(String fromId, TransactionRequest transferRequest, Function<Account, Account> transfer) {
-        Optional<Account> maybeAccount = accountService.getAccount(fromId);
-        return maybeAccount
-                .map(transfer)
-                .map(account -> accountService.update(account))
-                .map(account -> new TransactionResponse(account.id, null, BigInteger.valueOf(transferRequest.amount), account));
-    }
-
     private Optional<TransactionResponse> withdraw(String fromId, TransactionRequest transferRequest) {
         Function<Account, Account> withdraw = account -> account.withdraw(BigInteger.valueOf(transferRequest.amount));
         return transfer(fromId, transferRequest, withdraw);
@@ -47,6 +39,14 @@ public class TransactionService {
     private Optional<TransactionResponse> deposit(String fromId, TransactionRequest transferRequest) {
         Function<Account, Account> deposit = account -> account.deposit(BigInteger.valueOf(transferRequest.amount));
         return transfer(fromId, transferRequest, deposit);
+    }
+
+    private Optional<TransactionResponse> transfer(String fromId, TransactionRequest transferRequest, Function<Account, Account> transfer) {
+        Optional<Account> maybeAccount = accountService.getAccount(fromId);
+        return maybeAccount
+                .map(transfer)
+                .map(account -> accountService.update(account))
+                .map(account -> new TransactionResponse(account.id, null, BigInteger.valueOf(transferRequest.amount), account));
     }
 
     private Optional<Transaction> executeAccountToAccountTransaction(String fromId,

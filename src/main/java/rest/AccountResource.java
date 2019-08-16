@@ -44,11 +44,9 @@ public class AccountResource {
                 .build();
     }
 
-    @GET
     @Path("/{id}")
-    public Optional<Account> getAccount(@PathParam("id") String id) {
+    @GET
+    public Optional<Account> fetchAccount(@PathParam("id") String id) {
         return accountService.getAccount(id);
     }
-
-
 }

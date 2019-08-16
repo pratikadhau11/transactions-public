@@ -62,6 +62,7 @@ public class AccountIntegration {
                 .request()
                 .get();
 
+        assertEquals(200, tomResponse.getStatus());
         JsonNode jsonNode = tomResponse.readEntity(JsonNode.class);
         assertEquals("Tom", jsonNode.get("name").asText());
         assertEquals(0l, jsonNode.get("balance").asLong());
