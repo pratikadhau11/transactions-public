@@ -1,17 +1,6 @@
 package integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import configurations.ApplicationConfiguration;
-import configurations.Main;
-import io.dropwizard.jdbi3.JdbiFactory;
-import io.dropwizard.testing.ResourceHelpers;
-import io.dropwizard.testing.junit.DropwizardAppRule;
-import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.jdbi.v3.core.Jdbi;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
@@ -21,18 +10,11 @@ import javax.ws.rs.core.UriBuilder;
 
 import static org.junit.Assert.assertEquals;
 
-public class AccountIntegration {
-    @ClassRule
-    public static final DropwizardAppRule<ApplicationConfiguration> RULE =
-            new DropwizardAppRule<>(Main.class,
-                    ResourceHelpers.resourceFilePath("test-application.yml"));
-    JerseyClient client = new JerseyClientBuilder().build();
-
+public class AccountIntegration extends Integration {
     String tomLocation;
-    @Before
-    public void setUp() throws Exception {
-        RULE.getApplication().run("db", "migrate", ResourceHelpers.resourceFilePath("test-application.yml"));
 
+    @Override
+    void testSetup() {
         Response tomCreated = client.target(
                 String.format("http://localhost:%s/accounts", RULE.getLocalPort()))
                 .request(MediaType.APPLICATION_JSON_TYPE)
@@ -43,17 +25,6 @@ public class AccountIntegration {
         assertEquals(201, tomCreated.getStatus());
 
         tomLocation = tomCreated.getHeaderString("location");
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        JdbiFactory jdbiFactory = new JdbiFactory();
-        Jdbi jdbi = jdbiFactory.build(RULE.getEnvironment(), RULE.getConfiguration().getDataSourceFactory(), "h2");
-        jdbi.withHandle(handle -> {
-            handle.execute("DROP TABLE ACCOUNTS;");
-            handle.execute("DROP TABLE DATABASECHANGELOG;");
-            return 1;
-        });
     }
 
     @Test

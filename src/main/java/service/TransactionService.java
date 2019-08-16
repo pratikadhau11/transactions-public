@@ -5,30 +5,45 @@ import domain.transaction.Transaction;
 
 import java.math.BigInteger;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 public class TransactionService {
     private AccountService accountService;
+
     public TransactionService(AccountService accountService) {
         this.accountService = accountService;
     }
 
     public Optional<TransactionResponse> transfer(String fromId, TransactionRequest transferRequest) {
+        String to = transferRequest instanceof ToAccountTransactionRequest ?
+                ((ToAccountTransactionRequest) transferRequest).to :
+                UUID.randomUUID().toString();
+
+        String transactionType = getTransactionType(transferRequest);
+
         synchronized (fromId.intern()) {
-            if(transferRequest instanceof ToBankTransactionRequest){
-                return transferToOtherAccount(fromId, (ToBankTransactionRequest) transferRequest);
-            } else if(transferRequest instanceof WithdrawalRequest){
-                return withdraw(fromId, transferRequest);
-            } else {
-                return deposit(fromId, transferRequest);
+            synchronized (to.intern()) {
+                switch (transactionType) {
+                    case "Account" :
+                        return transferToOtherAccount(fromId, (ToAccountTransactionRequest) transferRequest);
+                    case "Withdraw" :
+                        return withdraw(fromId, transferRequest);
+                    default:
+                        return deposit(fromId, transferRequest);
+                }
+
             }
         }
     }
 
-    private Optional<TransactionResponse> transferToOtherAccount(String fromId, ToBankTransactionRequest transferRequest) {
-        synchronized (transferRequest.to.intern()) {
-            return executeAccountToAccountTransaction(fromId, transferRequest).map(this::saveTransaction);
-        }
+    private String getTransactionType(TransactionRequest  transferRequest){
+        return transferRequest instanceof ToAccountTransactionRequest ? "Account"
+                : transferRequest instanceof DepositRequest ? "Deposit" : "Withdraw";
+    }
+
+    private Optional<TransactionResponse> transferToOtherAccount(String fromId, ToAccountTransactionRequest transferRequest) {
+        return executeAccountToAccountTransaction(fromId, transferRequest).map(this::saveTransaction);
     }
 
     private Optional<TransactionResponse> withdraw(String fromId, TransactionRequest transferRequest) {
@@ -50,7 +65,7 @@ public class TransactionService {
     }
 
     private Optional<Transaction> executeAccountToAccountTransaction(String fromId,
-                                                                     ToBankTransactionRequest transferRequest) {
+                                                                     ToAccountTransactionRequest transferRequest) {
         Optional<Account> maybeFrom = accountService.getAccount(fromId);
         Account to = accountService.getAccount(transferRequest.to)
                 .orElseThrow(() ->

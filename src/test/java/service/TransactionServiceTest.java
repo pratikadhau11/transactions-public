@@ -1,6 +1,7 @@
 package service;
 
 import domain.account.Account;
+import javafx.util.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,10 +11,16 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +46,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void shouldDepositMoneyToAccount() {
+    public void shouldDepositMoneyToAccount() throws InterruptedException {
         DepositRequest transferRequest = new DepositRequest(1000l);
         ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
         Account depositedAccount = account.deposit(new BigInteger("1000"));
@@ -57,7 +64,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void shouldWithdrawMoneyToAccount() {
+    public void shouldWithdrawMoneyToAccount() throws InterruptedException {
         WithdrawalRequest transferRequest = new WithdrawalRequest(1000l);
         ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
         Account withdrawnAccount = account.withdraw(new BigInteger("1000"));
@@ -75,11 +82,11 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void shouldTransferMoneyToOtherAccount() {
+    public void shouldTransferMoneyToOtherAccount() throws InterruptedException {
         Account annAccount = new Account("2", "Ann").deposit(new BigInteger("9000"));
         Optional<Account> mayBeAnnAccount = Optional.of(annAccount);
         when(accountService.getAccount("2")).thenReturn(mayBeAnnAccount);
-        ToBankTransactionRequest transferRequest = new ToBankTransactionRequest(1000l, "2");
+        ToAccountTransactionRequest transferRequest = new ToAccountTransactionRequest(1000l, "2");
         ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
         Account withdrawnAccount = account.withdraw(new BigInteger("1000"));
         Account depositedAccount = annAccount.deposit(new BigInteger("1000"));
@@ -94,4 +101,5 @@ public class TransactionServiceTest {
         assertEquals(withdrawnAccount, transactionResponse.account);
         assertEquals(new BigInteger("1000"), transactionResponse.amount);
     }
+
 }

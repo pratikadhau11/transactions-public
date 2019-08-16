@@ -5,7 +5,7 @@ import domain.account.DepositException;
 import domain.account.WithdrawException;
 import domain.transaction.TransactionException;
 import service.DepositRequest;
-import service.ToBankTransactionRequest;
+import service.ToAccountTransactionRequest;
 import service.TransactionResponse;
 import service.TransactionService;
 import service.WithdrawalRequest;
@@ -33,7 +33,7 @@ public class TransactionResource {
     public Optional<TransactionResponse> transfer(@PathParam("id") String id, BankTransferRequest bankTransferRequest) {
         try{
             return transactionService.transfer(id,
-                    new ToBankTransactionRequest(bankTransferRequest.getAmount(), bankTransferRequest.getTo()));
+                    new ToAccountTransactionRequest(bankTransferRequest.getAmount(), bankTransferRequest.getTo()));
         }catch (TransactionException | DepositException | WithdrawException e) {
             throw new BadRequestException(e.getMessage());
         }

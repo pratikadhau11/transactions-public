@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import service.DepositRequest;
-import service.ToBankTransactionRequest;
+import service.ToAccountTransactionRequest;
 import service.TransactionService;
 import service.WithdrawalRequest;
 
@@ -106,9 +106,9 @@ public class TransactionResourceTest {
 
         transactionResource.transfer(fromAccount, bankTransferRequest);
 
-        ArgumentCaptor<ToBankTransactionRequest> captor = ArgumentCaptor.forClass(ToBankTransactionRequest.class);
+        ArgumentCaptor<ToAccountTransactionRequest> captor = ArgumentCaptor.forClass(ToAccountTransactionRequest.class);
         verify(transactionService, times(1)).transfer(eq(fromAccount), captor.capture());
-        ToBankTransactionRequest value = captor.getValue();
+        ToAccountTransactionRequest value = captor.getValue();
         Assert.assertEquals(10000l, value.amount);
         Assert.assertEquals("1", value.to);
     }
@@ -121,7 +121,7 @@ public class TransactionResourceTest {
                 .readValue("{\"amount\": 10000, \"to\": \"1\"}",
                         BankTransferRequest.class);
         String fromAccount = "fromAccount";
-        ArgumentCaptor<ToBankTransactionRequest> captor = ArgumentCaptor.forClass(ToBankTransactionRequest.class);
+        ArgumentCaptor<ToAccountTransactionRequest> captor = ArgumentCaptor.forClass(ToAccountTransactionRequest.class);
         when(transactionService.transfer(eq(fromAccount), captor.capture()))
                 .thenThrow(new TransactionException("some thing"));
 

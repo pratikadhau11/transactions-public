@@ -1,11 +1,13 @@
 package persistence;
 
 import domain.account.Account;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import service.AccountCreationException;
 import org.jdbi.v3.core.Jdbi;
 import service.AccountDao;
 
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +23,7 @@ public class AccountDaoImpl implements AccountDao {
 
     @Override
     public List<Account> getAllAccounts() {
-        List<Account> accounts1 = jdbi.withHandle(handle -> {
+        return jdbi.withHandle(handle -> {
             List<Account> accounts = new ArrayList<>();
             handle.createQuery("Select * from accounts")
                     .mapToMap()
@@ -32,7 +34,6 @@ public class AccountDaoImpl implements AccountDao {
                     });
             return accounts;
         });
-        return accounts1;
     }
 
     @Override
@@ -61,15 +62,16 @@ public class AccountDaoImpl implements AccountDao {
 
     @Override
     public Account create(Account account) {
-        Integer rowsUpdated = jdbi.withHandle(handle ->
-                handle.createUpdate("INSERT INTO accounts(id, name, balance) VALUES (?, ?, ?)")
-                .bind(0, account.id) // 0-based parameter indexes
-                .bind(1, account.name)
-                .bind(2, account.balance.longValue())
-                .execute());
+        try {
+            jdbi.withHandle(handle ->
+                    handle.createUpdate("INSERT INTO accounts(id, name, balance) VALUES (?, ?, ?)")
+                            .bind(0, account.id) // 0-based parameter indexes
+                            .bind(1, account.name)
+                            .bind(2, account.balance.longValue())
+                            .execute());
 
-        if(rowsUpdated == 0){
-            throw new AccountCreationException("Account is not created");
+        } catch (UnableToExecuteStatementException e) {
+            throw new AccountCreationException("Account is not created, use different id");
         }
 
         return account;
