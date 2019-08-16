@@ -1,6 +1,6 @@
 package service;
 
-import domain.Account;
+import domain.account.Account;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,8 +9,10 @@ public interface AccountDao {
 
     List<Account> getAllAccounts();
 
-    Optional<Account> getAllAccount(String id);
+    Optional<Account> getAccount(String id);
 
-    Boolean save(Account account);
+    Account update(Account account);
+
+    Account create(Account account) throws AccountCreationException;
 }
 

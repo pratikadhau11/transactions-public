@@ -1,6 +1,7 @@
 package persistence;
 
-import domain.Account;
+import domain.account.Account;
+import service.AccountCreationException;
 import org.jdbi.v3.core.Jdbi;
 import service.AccountDao;
 
@@ -35,7 +36,7 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public Optional<Account> getAllAccount(String id) {
+    public Optional<Account> getAccount(String id) {
         return jdbi.withHandle(handle ->  handle.createQuery("Select * from accounts where id = '" +id +"'")
                     .mapToMap()
                     .findFirst()
@@ -49,12 +50,28 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public Boolean save(Account account) {
+    public Account update(Account account) {
         return jdbi.withHandle(
                 handle -> {
-                    int execute = handle.createUpdate(String.format("UPDATE accounts SET balance='%s' WHERE id=%s;", account.balance, account.id)).execute();
+                    int execute = handle.createUpdate(String.format("UPDATE accounts SET balance=%s WHERE id='%s';", account.balance.longValue(), account.id)).execute();
                     return execute;
                 }
-        ) == 1 ? Boolean.TRUE : Boolean.FALSE;
+        ) == 1 ? account : getAccount(account.id).get();
+    }
+
+    @Override
+    public Account create(Account account) {
+        Integer rowsUpdated = jdbi.withHandle(handle ->
+                handle.createUpdate("INSERT INTO accounts(id, name, balance) VALUES (?, ?, ?)")
+                .bind(0, account.id) // 0-based parameter indexes
+                .bind(1, account.name)
+                .bind(2, account.balance.longValue())
+                .execute());
+
+        if(rowsUpdated == 0){
+            throw new AccountCreationException("Account is not created");
+        }
+
+        return account;
     }
 }

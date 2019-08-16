@@ -17,38 +17,8 @@
             <column name="balance" type="bigint" defaultValue="0"/>
         </createTable>
     </changeSet>
-    <changeSet id="2" author="pratik">
-        <createTable tableName="transactions">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="from" type="bigint"/>
-            <column name="to" type="bigint"/>
-            <column name="amount" type="bigint" defaultValue="0"/>
-        </createTable>
-    </changeSet>
-    <changeSet id="3" author="pratik">
-        <addForeignKeyConstraint
-                baseColumnNames="from"
-                baseTableName="transactions"
-                constraintName="fk_from_transactions_accounts"
-                onDelete="CASCADE"
-                onUpdate="RESTRICT"
-                referencedColumnNames="id"
-                referencedTableName="accounts"/>
-    </changeSet>
-    <changeSet id="4" author="pratik">
-        <addForeignKeyConstraint
-                baseColumnNames="to"
-                baseTableName="transactions"
-                constraintName="fk_to_transactions_accounts"
-                onDelete="CASCADE"
-                onUpdate="RESTRICT"
-                referencedColumnNames="id"
-                referencedTableName="accounts"/>
-    </changeSet>
 
-    <changeSet author="pratik" id="5">
+    <!--<changeSet author="pratik" id="5">
         <sql dbms="h2, oracle"
              endDelimiter="\nGO"
              splitStatements="true"
@@ -56,5 +26,5 @@
             insert into accounts (id, name, balance) values ('1', 'tom', 1000000);insert into accounts (id, name, balance) values ('2', 'ann', 1000000)
 
         </sql>
-    </changeSet>
+    </changeSet>-->
 </databaseChangeLog>

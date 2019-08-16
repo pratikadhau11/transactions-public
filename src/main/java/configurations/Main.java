@@ -1,6 +1,5 @@
 package configurations;
 
-import hellow.HelloWorldResource;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jdbi3.JdbiFactory;
@@ -9,8 +8,8 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import persistence.AccountDaoImpl;
-import persistence.TransactionDaoImpl;
 import rest.AccountResource;
+import rest.TransactionResource;
 import service.AccountDao;
 import service.AccountService;
 import service.TransactionService;
@@ -43,20 +42,14 @@ public class Main extends Application<ApplicationConfiguration> {
         JdbiFactory jdbiFactory = new JdbiFactory();
         Jdbi jdbi = jdbiFactory.build(environment, configuration.getDataSourceFactory(), "h2");
 
-        final HelloWorldResource resource = new HelloWorldResource(
-                configuration.getTemplate(),
-                configuration.getDefaultName()
-        );
-
-
         AccountDao accountDao = new AccountDaoImpl(jdbi);
         AccountService accountService = new AccountService(accountDao);
-
+        final AccountResource accountResource = new AccountResource(accountService);
+        environment.jersey().register(accountResource);
 
         TransactionService transactionService = new TransactionService(accountService);
-        final AccountResource accountResource = new AccountResource(accountService, transactionService);
-        environment.jersey().register(resource);
-        environment.jersey().register(accountResource);
+        final TransactionResource transactionResource = new TransactionResource(transactionService);
+        environment.jersey().register(transactionResource);
     }
 
 }

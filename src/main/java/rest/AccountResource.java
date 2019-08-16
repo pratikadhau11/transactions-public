@@ -1,41 +1,47 @@
 package rest;
 
-import domain.Account;
-import domain.AccountNotFoundException;
-import domain.DepositException;
+import domain.account.Account;
 
-import domain.TransactionException;
-import domain.WithdrawException;
 import service.AccountService;
-import service.TransactionService;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import java.util.List;
 import java.util.Optional;
 
 @Path("/accounts")
-
 @Produces(MediaType.APPLICATION_JSON)
 public class AccountResource {
 
     private AccountService accountService;
-    private TransactionService transactionService;
 
-    public AccountResource(AccountService accountService, TransactionService transactionService) {
+
+    public AccountResource(AccountService accountService) {
         this.accountService = accountService;
-        this.transactionService = transactionService;
     }
 
     @GET
     public List<Account> getAccounts() {
         return accountService.getAccounts();
+    }
+
+    @POST
+    public Response createAccount(CreateAccountRequest createAccountRequest, @Context UriInfo uriInfo) {
+        Account account = accountService.createAccount(createAccountRequest);
+        return Response
+                .created(UriBuilder
+                        .fromUri(uriInfo.getRequestUri())
+                        .path(account.id).build())
+                .build();
     }
 
     @GET
@@ -44,13 +50,5 @@ public class AccountResource {
         return accountService.getAccount(id);
     }
 
-    @PUT
-    @Path("/{id}/transfer")
-    public Optional<TransactionResponse> transfer(@PathParam("id") String id, TransferRequest transferRequest) {
-        try{
-            return transactionService.transfer(id, transferRequest);
-        }catch (WithdrawException | DepositException | TransactionException | AccountNotFoundException e) {
-            throw new BadRequestException(e.getMessage());
-        }
-    }
+
 }

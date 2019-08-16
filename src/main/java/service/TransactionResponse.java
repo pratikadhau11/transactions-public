@@ -1,10 +1,14 @@
-package rest;
+package service;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import domain.Account;
+import domain.account.Account;
 
 import java.math.BigInteger;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionResponse {
     @JsonProperty
     String from;

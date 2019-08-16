@@ -1,4 +1,4 @@
-package domain;
+package domain.account;
 
 import java.math.BigInteger;
 import java.util.Objects;
